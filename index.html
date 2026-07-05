@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Now Playing - Premium Single Experience</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons for authentic Spotify controls -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        spotify: {
+                            green: '#1DB954',
+                            lightgreen: '#1ed760',
+                            black: '#121212',
+                            dark: '#040404',
+                            card: '#181818',
+                            hover: '#282828',
+                            textMuted: '#b3b3b3',
+                            border: '#2a2a2a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom scrollbar matching Spotify web client */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        
+        /* Smooth glowing background transitions */
+        .ambient-bg {
+            transition: background 1.5s ease;
+        }
+        
+        /* Custom slider progress styling to mimic Spotify active bar */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: #4d4d4d;
+            height: 4px;
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.1s ease;
+        }
+        input[type="range"]:hover::-webkit-slider-thumb {
+            opacity: 1;
+        }
+        input[type="range"]:hover {
+            background: #1DB954;
+        }
+
+        /* Lyric scroll animation utilities */
+        .lyric-line {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: left center;
+        }
+        .lyric-line.active {
+            color: #ffffff;
+            font-weight: 700;
+            transform: scale(1.05);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-spotify-dark text-white font-sans h-full overflow-hidden select-none">
+
+    <!-- Hidden native audio element -->
+    <audio id="audio-element" preload="auto"></audio>
+
+    <!-- Ambient glowing backdrop -->
+    <div id="dynamic-backdrop" class="ambient-bg absolute inset-0 bg-gradient-to-b from-purple-900/40 via-spotify-black to-spotify-dark z-0 filter blur-3xl opacity-85 pointer-events-none"></div>
+
+    <!-- Main Layout Container -->
+    <div class="relative z-10 flex flex-col h-full">
+        
+        <!-- Header Navigation Bar -->
+        <header class="flex items-center justify-between px-6 py-4 md:px-8 bg-black/20 backdrop-blur-md border-b border-white/5">
+            <div class="flex items-center space-x-2">
+                <i class="fab fa-spotify text-spotify-green text-3xl animate-pulse"></i>
+                <span class="font-bold text-lg tracking-tight">Spotify <span class="text-spotify-textMuted font-light"></span></span>
+            </div>
+            
+            <div class="text-right">
+                <p class="text-[10px] uppercase tracking-widest text-spotify-textMuted">NOW PLAYING EXCLUSIVE PREVIEW</p>
+                <p class="text-xs font-semibold text-white/80 truncate max-w-[240px]" id="current-album-title">Retro Horizons & Chill Beats</p>
+            </div>
+        </header>
+
+        <main class="flex-1 grid grid-cols-1 md:grid-cols-12 overflow-hidden max-w-[1500px] mx-auto w-full p-4 md:p-6 gap-6">
+            
+            <!-- Left Stage Panel (Col-span 7): Album Cover, Visualizer, Info & Stream badging -->
+            <section class="md:col-span-7 flex flex-col justify-between items-center bg-spotify-card/25 backdrop-blur-sm rounded-2xl border border-white/5 p-6 overflow-y-auto">
+                
+                <!-- Album Identity Header for Mobile/Tab -->
+                <div class="w-full text-center mb-4 md:hidden">
+                    <p class="text-[9px] uppercase tracking-widest text-spotify-textMuted">Featured Single</p>
+                    <h2 class="text-sm font-semibold text-white truncate" id="mobile-album-title">Retro Horizons & Chill Beats</h2>
+                </div>
+
+                <!-- Glowing Cover Art Container -->
+                <div class="relative group my-auto w-52 h-52 sm:w-64 sm:h-64 xl:w-80 xl:h-80 aspect-square rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.85)] border border-white/10 transition-transform duration-500 hover:scale-[1.02]">
+                    <img id="track-cover" src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&q=80&w=800" alt="Cover Art" class="w-full h-full object-cover">
+                    <!-- Overlay Play Hover State -->
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300">
+                        <button onclick="togglePlay()" class="bg-spotify-green text-black w-14 h-14 rounded-full flex items-center justify-center transform scale-90 group-hover:scale-100 transition-all hover:scale-110 active:scale-95 shadow-2xl">
+                            <i id="cover-play-icon" class="fas fa-play text-xl ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="w-full mt-6 flex items-center justify-between">
+                    <div class="truncate pr-4">
+                        <h1 id="track-title" class="text-2xl sm:text-3xl font-extrabold tracking-tight truncate">Neon Lights</h1>
+                        <p id="track-artist" class="text-spotify-textMuted hover:text-white transition-colors text-sm sm:text-base mt-0.5">Lofi Dreamer</p>
+                    </div>
+                    
+                    <div class="flex items-center space-x-3">
+                        <button id="like-btn" onclick="toggleLike()" class="text-spotify-textMuted hover:text-white transition-all transform hover:scale-110 text-xl">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Focused Stream Button Area -->
+                <div class="w-full mt-5">
+                    <a id="link-spotify" href="https://open.spotify.com" target="_blank" class="flex items-center justify-center gap-3 bg-spotify-green hover:bg-spotify-lightgreen text-black py-3 px-6 rounded-full border border-white/5 text-xs sm:text-sm font-bold tracking-wider transition-all uppercase shadow-[0_10px_30px_rgba(29,185,84,0.3)]">
+                        <i class="fab fa-spotify text-xl"></i>
+                        <span>Listen Full Single On Spotify</span>
+                    </a>
+                </div>
+                
+                <!-- Simulated Dynamic Wave Visualizer Canvas -->
+                <div class="w-full mt-5 h-16 bg-spotify-card/50 rounded-xl border border-white/5 relative overflow-hidden flex items-center justify-center">
+                    <canvas id="visualizer-canvas" class="w-full h-full absolute inset-0 opacity-80"></canvas>
+                    <span class="text-[9px] tracking-widest uppercase text-spotify-textMuted/40 absolute bottom-1 right-2 pointer-events-none">Live Audio Spectrograph</span>
+                </div>
+            </section>
+
+            <section class="md:col-span-5 flex flex-col bg-spotify-card/30 backdrop-blur-md md:bg-spotify-card/15 rounded-2xl border border-white/5 p-5 overflow-hidden relative">
+                
+                <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-spotify-textMuted flex items-center gap-2">
+                        <i class="fas fa-quote-left text-spotify-green"></i> Synced Lyrics
+                    </h2>
+                    <span id="sync-indicator" class="text-[9px] uppercase bg-spotify-green/20 text-spotify-green border border-spotify-green/30 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-spotify-green animate-pulse"></span> Active Sync
+                    </span>
+                </div>
+
+                <!-- Scrolling lyrics box -->
+                <div id="lyrics-container" class="flex-1 overflow-y-auto space-y-4 pr-2 scroll-smooth py-12 relative">
+                    <!-- Lyrics loaded by JS -->
+                    <p class="text-spotify-textMuted/40 text-center py-8">Loading track synchronization...</p>
+                </div>
+            </section>
+        </main>
+
+        <footer class="bg-spotify-card border-t border-spotify-border p-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0 relative z-20">
+            
+            <!-- Left: Current Track Mini-Thumb (Hidden on mobile) -->
+            <div class="hidden md:flex items-center space-x-3 w-1/4 min-w-[200px]">
+                <img id="mini-thumb" class="w-12 h-12 rounded-md object-cover border border-white/10" src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&q=80&w=200" alt="Mini Thumbnail">
+                <div class="truncate">
+                    <p id="mini-title" class="font-medium text-xs text-white truncate">Neon Lights</p>
+                    <p id="mini-artist" class="text-[11px] text-spotify-textMuted hover:text-white transition-colors truncate">Lofi Dreamer</p>
+                </div>
+            </div>
+
+            <!-- Center: Player controls & timelines -->
+            <div class="flex flex-col items-center w-full md:w-2/4 max-w-xl">
+                <!-- Control Buttons -->
+                <div class="flex items-center space-x-6 mb-2">
+                    <button id="shuffle-btn" onclick="toggleShuffle()" class="text-spotify-textMuted hover:text-white transition-all text-xs relative" title="Toggle Intro Loop">
+                        <i class="fas fa-random"></i>
+                    </button>
+                    <!-- Rewind 15 seconds -->
+                    <button onclick="skipTime(-15)" class="text-spotify-textMuted hover:text-white transition-all text-sm flex items-center gap-1" title="Rewind 15s">
+                        <i class="fas fa-backward"></i>
+                        <span class="text-[9px] font-bold">-15s</span>
+                    </button>
+                    <!-- Play / Pause -->
+                    <button onclick="togglePlay()" id="play-btn" class="bg-white text-black w-10 h-10 rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md" title="Play / Pause">
+                        <i class="fas fa-play text-sm ml-0.5"></i>
+                    </button>
+                    <!-- Skip Forward 15 seconds -->
+                    <button onclick="skipTime(15)" class="text-spotify-textMuted hover:text-white transition-all text-sm flex items-center gap-1" title="Forward 15s">
+                        <span class="text-[9px] font-bold">+15s</span>
+                        <i class="fas fa-forward"></i>
+                    </button>
+                    <button id="repeat-btn" onclick="toggleRepeat()" class="text-spotify-textMuted hover:text-white transition-all text-xs relative" title="Repeat Single">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                </div>
+
+                <!-- Progress Bar Timeline -->
+                <div class="w-full flex items-center space-x-3">
+                    <span id="current-time" class="text-[10px] text-spotify-textMuted w-10 text-right">0:00</span>
+                    <div class="relative flex-1 group flex items-center">
+                        <input id="progress-bar" type="range" min="0" max="100" value="0" class="w-full accent-spotify-green" oninput="seekAudio(this.value)">
+                    </div>
+                    <span id="duration" class="text-[10px] text-spotify-textMuted w-10">0:00</span>
+                </div>
+            </div>
+
+            <!-- Right: Secondary Volume & share integrations -->
+            <div class="flex items-center justify-end space-x-4 w-full md:w-1/4">
+                <button onclick="scrollToActiveLyric()" class="text-spotify-textMuted hover:text-spotify-green transition-colors text-sm" title="Center Scroll Active Lyric">
+                    <i class="fas fa-align-left text-base"></i>
+                </button>
+                
+                <div class="flex items-center space-x-2 w-24">
+                    <button onclick="toggleMute()" id="mute-btn" class="text-spotify-textMuted hover:text-white transition-colors" title="Mute Volume">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                    <input id="volume-slider" type="range" min="0" max="100" value="80" class="w-full accent-spotify-green" oninput="setVolume(this.value)">
+                </div>
+                
+                <button onclick="shareTrack()" class="text-spotify-textMuted hover:text-white transition-colors" title="Copy Release Details Share Message">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+            </div>
+        </footer>
+
+        <!-- Custom Copy Toast Alert Box -->
+        <div id="toast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-spotify-green text-black px-6 py-2.5 rounded-full font-bold shadow-2xl tracking-wide opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-2">
+            <i class="fas fa-check-circle"></i>
+            <span id="toast-message">Copied Share Link!</span>
+        </div>
+    </div>
+
+    <script>
+        // High fidelity single song dataset with synced lyrics, backdrop config, and media metadata
+        let trackDetails = {
+            title: "Only Mine",
+            artist: "Lofi Dreamer",
+            album: "Retro Horizons & Chill Beats",
+            cover: "https://t2.genius.com/unsafe/258x258/https%3A%2F%2Fimages.genius.com%2Fa0273334148084b20f52fb1cdc101b1c.1000x1000x1.png",
+            audioUrl: "song7.mp3",
+            themeColor: "from-purple-950/50 via-spotify-black to-spotify-dark",
+            spotifyUrl: "https://open.spotify.com",
+            lyrics: [
+                { time: 0, text: `Koi bhi khwaahish nahi iss dil ko, tu mil jaaye toh 🎵` },
+                { time: 5, text: `Milta hai isko sukoon chehra tera khil jaaye toh` },
+                { time: 10, text: "Phiru ab maara maara main\nChaand se bichhda taara main" },
+                { time: 15, text: `Mere ho (Mere ho), bas mere tum (Mere tum)` },
+                { time: 20, text: `Keh do na saare ke saare mere tum
+Milte hain kismat se (Kismat se)` },
+                { time: 25, text: `Kismat ke aise sitaare mere tum` },
+                { time: 30, text: `Kehta hoon itni mohabbat hai tumse, jitni falak se zameen
+Keh do na tum bhi yeh, kehne mein kya hai? Hota hai ishq yahi` },
+            ]
+        };
+
+        let isPlaying = false;
+        let isMuted = false;
+        let isShuffle = false;
+        let isRepeat = false;
+        let userLiked = false;
+        let activeLyricIndex = -1;
+
+        // Elements selectors
+        const audio = document.getElementById('audio-element');
+        const playBtn = document.getElementById('play-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const currentTimeEl = document.getElementById('current-time');
+        const durationEl = document.getElementById('duration');
+        const volumeSlider = document.getElementById('volume-slider');
+        const muteBtn = document.getElementById('mute-btn');
+        const shuffleBtn = document.getElementById('shuffle-btn');
+        const repeatBtn = document.getElementById('repeat-btn');
+        const likeBtn = document.getElementById('like-btn');
+        const lyricsContainer = document.getElementById('lyrics-container');
+
+        // Dynamic page components
+        const trackTitle = document.getElementById('track-title');
+        const trackArtist = document.getElementById('track-artist');
+        const currentAlbumTitle = document.getElementById('current-album-title');
+        const mobileAlbumTitle = document.getElementById('mobile-album-title');
+        const trackCover = document.getElementById('track-cover');
+        const miniThumb = document.getElementById('mini-thumb');
+        const miniTitle = document.getElementById('mini-title');
+        const miniArtist = document.getElementById('mini-artist');
+        const backdrop = document.getElementById('dynamic-backdrop');
+        const coverPlayIcon = document.getElementById('cover-play-icon');
+
+        const canvas = document.getElementById('visualizer-canvas');
+        const ctx = canvas.getContext('2d');
+        let visualizerAnimFrameId;
+
+        // Setup resize handlers for dynamic canvas size
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Simulated spectrum bands
+        let visualizerBars = [];
+        const totalBars = 35;
+        for (let i = 0; i < totalBars; i++) {
+            visualizerBars.push({
+                x: i,
+                currentHeight: 0,
+                targetHeight: 0,
+                speed: 0.12 + Math.random() * 0.12
+            });
+        }
+
+        // Draw Canvas Waveform
+        function drawVisualizer() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const barWidth = canvas.width / totalBars;
+            
+            for (let i = 0; i < totalBars; i++) {
+                const bar = visualizerBars[i];
+                if (isPlaying) {
+                    if (Math.random() < 0.18) {
+                        bar.targetHeight = Math.random() * (canvas.height * 0.82);
+                    }
+                } else {
+                    bar.targetHeight = Math.sin(Date.now() * 0.0035 + i * 0.25) * (canvas.height * 0.12) + (canvas.height * 0.04);
+                }
+
+                bar.currentHeight += (bar.targetHeight - bar.currentHeight) * bar.speed;
+                const xPos = i * barWidth;
+                const yPos = canvas.height - bar.currentHeight;
+                
+                const grad = ctx.createLinearGradient(xPos, canvas.height, xPos, yPos);
+                grad.addColorStop(0, '#1DB954');
+                grad.addColorStop(1, '#1ed760');
+                
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.roundRect(xPos + 2, yPos, barWidth - 4, bar.currentHeight, 2.5);
+                ctx.fill();
+            }
+            
+            visualizerAnimFrameId = requestAnimationFrame(drawVisualizer);
+        }
+
+        // Load Active Track details
+        function loadTrack(track) {
+            audio.src = track.audioUrl;
+            trackTitle.textContent = track.title;
+            trackArtist.textContent = track.artist;
+            currentAlbumTitle.textContent = track.album;
+            if (mobileAlbumTitle) mobileAlbumTitle.textContent = track.album;
+            trackCover.src = track.cover;
+            miniThumb.src = track.cover;
+            miniTitle.textContent = track.title;
+            miniArtist.textContent = track.artist;
+
+            // Update external buttons
+            document.getElementById('link-spotify').href = track.spotifyUrl || "https://open.spotify.com";
+            
+            // Adjust dynamic theme ambient glow background
+            backdrop.className = `ambient-bg absolute inset-0 bg-gradient-to-b ${track.themeColor || 'from-purple-950/50 via-spotify-black to-spotify-dark'} to-spotify-dark z-0 filter blur-3xl opacity-85 pointer-events-none`;
+            
+            renderLyrics(track.lyrics);
+            activeLyricIndex = -1;
+            
+            // Reset player timelines
+            progressBar.value = 0;
+            currentTimeEl.textContent = "0:00";
+            durationEl.textContent = "0:00";
+        }
+
+        // Render lyrics inside the side container
+        function renderLyrics(lyrics) {
+            lyricsContainer.innerHTML = '';
+            if (!lyrics || lyrics.length === 0) {
+                lyricsContainer.innerHTML = `<p class="text-spotify-textMuted text-center mt-12 italic">Instrumental - No Lyrics Available</p>`;
+                return;
+            }
+
+            lyrics.forEach((lyric, index) => {
+                const p = document.createElement('p');
+                p.id = `lyric-${index}`;
+                p.className = 'lyric-line text-lg sm:text-xl font-semibold text-spotify-textMuted/30 text-left py-1.5 cursor-pointer hover:text-white/80';
+                p.textContent = lyric.text;
+                
+                // Allow jumping directly to timeline lyric point
+                p.onclick = () => {
+                    audio.currentTime = lyric.time;
+                    if (!isPlaying) togglePlay();
+                };
+
+                lyricsContainer.appendChild(p);
+            });
+        }
+
+        // Synchronize scrolling and active state of lyrics with song playback
+        function updateLyricsSync() {
+            if (!trackDetails.lyrics || trackDetails.lyrics.length === 0) return;
+
+            const time = audio.currentTime;
+            let activeIdx = -1;
+
+            // Find current active lyric line matching playing seconds
+            for (let i = 0; i < trackDetails.lyrics.length; i++) {
+                if (time >= trackDetails.lyrics[i].time) {
+                    activeIdx = i;
+                } else {
+                    break;
+                }
+            }
+
+            if (activeIdx !== activeLyricIndex && activeIdx !== -1) {
+                // Remove active styling from previous
+                if (activeLyricIndex !== -1) {
+                    const prevEl = document.getElementById(`lyric-${activeLyricIndex}`);
+                    if (prevEl) {
+                        prevEl.classList.remove('active', 'text-white');
+                        prevEl.classList.add('text-spotify-textMuted/30');
+                    }
+                }
+
+                // Update & Highlight Active Element
+                activeLyricIndex = activeIdx;
+                const activeEl = document.getElementById(`lyric-${activeLyricIndex}`);
+                if (activeEl) {
+                    activeEl.classList.add('active');
+                    activeEl.classList.remove('text-spotify-textMuted/30');
+                    
+                    // Scroll active lyric to center
+                    const containerHeight = lyricsContainer.clientHeight;
+                    const elOffset = activeEl.offsetTop;
+                    const elHeight = activeEl.clientHeight;
+                    
+                    lyricsContainer.scrollTo({
+                        top: elOffset - (containerHeight / 2) + (elHeight / 2),
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        }
+
+        function scrollToActiveLyric() {
+            if (activeLyricIndex !== -1) {
+                const activeEl = document.getElementById(`lyric-${activeLyricIndex}`);
+                if (activeEl) {
+                    activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+
+        // Play / Pause toggle mechanics
+        function togglePlay() {
+            if (isPlaying) {
+                audio.pause();
+                isPlaying = false;
+                playBtn.innerHTML = '<i class="fas fa-play text-sm ml-0.5"></i>';
+                coverPlayIcon.className = "fas fa-play text-xl ml-0.5";
+            } else {
+                audio.play().then(() => {
+                    isPlaying = true;
+                    playBtn.innerHTML = '<i class="fas fa-pause text-sm"></i>';
+                    coverPlayIcon.className = "fas fa-pause text-xl";
+                }).catch(e => {
+                    showToast("Playback initialized: Tap to play!");
+                });
+            }
+        }
+
+        // Skip track time (+/- seconds)
+        function skipTime(secs) {
+            if (!audio.duration) return;
+            let newTime = audio.currentTime + secs;
+            if (newTime < 0) newTime = 0;
+            if (newTime > audio.duration) newTime = audio.duration;
+            audio.currentTime = newTime;
+            showToast(`${secs > 0 ? 'Skipped forward' : 'Rewound'} ${Math.abs(secs)}s`);
+        }
+
+        // Audio seek progress update
+        audio.addEventListener('timeupdate', () => {
+            if (!audio.duration) return;
+            
+            const current = audio.currentTime;
+            const total = audio.duration;
+            const progress = (current / total) * 100;
+            
+            progressBar.value = progress;
+            currentTimeEl.textContent = formatTime(current);
+            durationEl.textContent = formatTime(total);
+            
+            updateLyricsSync();
+        });
+
+        // Set duration text when track is loaded
+        audio.addEventListener('loadedmetadata', () => {
+            durationEl.textContent = formatTime(audio.duration || 0);
+        });
+
+        // Seek timeline function
+        function seekAudio(percent) {
+            if (!audio.duration) return;
+            const seekTo = (percent / 100) * audio.duration;
+            audio.currentTime = seekTo;
+        }
+
+        // Format raw seconds into beautiful digital representation (mm:ss)
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        // Set system volume slider values
+        function setVolume(value) {
+            audio.volume = value / 100;
+            if (value == 0) {
+                muteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                isMuted = true;
+            } else if (value < 50) {
+                muteBtn.innerHTML = '<i class="fas fa-volume-down"></i>';
+                isMuted = false;
+            } else {
+                muteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                isMuted = false;
+            }
+        }
+
+        // Fast mute buttons functionality
+        function toggleMute() {
+            if (isMuted) {
+                audio.volume = 0.8;
+                volumeSlider.value = 80;
+                muteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                isMuted = false;
+            } else {
+                audio.volume = 0;
+                volumeSlider.value = 0;
+                muteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                isMuted = true;
+            }
+        }
+
+        // Toggle heart like state
+        function toggleLike() {
+            userLiked = !userLiked;
+            if (userLiked) {
+                likeBtn.innerHTML = '<i class="fas fa-heart text-spotify-green text-lg animate-bounce"></i>';
+                likeBtn.classList.remove('text-spotify-textMuted');
+                showToast("Added to Your Library!");
+            } else {
+                likeBtn.innerHTML = '<i class="far fa-heart"></i>';
+                likeBtn.classList.add('text-spotify-textMuted');
+                showToast("Removed from Your Library");
+            }
+        }
+
+        // Custom loop repeat behaviors
+        function toggleRepeat() {
+            isRepeat = !isRepeat;
+            if (isRepeat) {
+                repeatBtn.classList.add('text-spotify-green');
+                repeatBtn.classList.remove('text-spotify-textMuted');
+                audio.loop = true;
+                showToast("Single repeat enabled");
+            } else {
+                repeatBtn.classList.remove('text-spotify-green');
+                repeatBtn.classList.add('text-spotify-textMuted');
+                audio.loop = false;
+                showToast("Single repeat disabled");
+            }
+        }
+
+        // Custom shuffle indicators (for a single song, this can simulate an Intro Loop mode)
+        function toggleShuffle() {
+            isShuffle = !isShuffle;
+            if (isShuffle) {
+                shuffleBtn.classList.add('text-spotify-green');
+                shuffleBtn.classList.remove('text-spotify-textMuted');
+                showToast("Intro loop preview active");
+            } else {
+                shuffleBtn.classList.remove('text-spotify-green');
+                shuffleBtn.classList.add('text-spotify-textMuted');
+                showToast("Intro loop preview inactive");
+            }
+        }
+
+        // Auto trigger next loop track at completion loop bounds
+        audio.addEventListener('ended', () => {
+            if (isShuffle) {
+                // Return to intro (second 0) and keep playing
+                audio.currentTime = 0;
+                audio.play();
+            } else if (!isRepeat) {
+                // Default stop
+                isPlaying = false;
+                playBtn.innerHTML = '<i class="fas fa-play text-sm ml-0.5"></i>';
+                coverPlayIcon.className = "fas fa-play text-xl ml-0.5";
+            }
+        });
+
+        // Custom toast popups
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = message;
+            toast.style.opacity = '1';
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 2500);
+        }
+
+        // Copy release details to clipboard
+        function shareTrack() {
+            const textarea = document.createElement('textarea');
+            textarea.value = `Now listening to "${trackDetails.title}" by ${trackDetails.artist} on Spotify! Stream it here: ${trackDetails.spotifyUrl}`;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast("Share message copied to clipboard!");
+            } catch (err) {
+                showToast("Unable to copy share message!");
+            }
+            document.body.removeChild(textarea);
+        }
+
+        window.onload = function() {
+            audio.volume = 0.8;
+            loadTrack(trackDetails);
+            drawVisualizer();
+        };
+    </script>
+</body>
+</html>
