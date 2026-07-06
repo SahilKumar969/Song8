@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="en" class="h-full">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify Now Playing - Billori Single Experience</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Spotify Now Playing - Premium Single Experience</title>
     <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com">
+    </script>
     <!-- FontAwesome Icons for authentic Spotify controls -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
     <script>
         tailwind.config = {
             theme: {
@@ -20,8 +21,8 @@
                     },
                     colors: {
                         spotify: {
-                            green: '#E91E63', /* Customized to beautiful crimson-rose to match Billori theme */
-                            lightgreen: '#FF5722', /* Vibrant saffron orange */
+                            green: '#1DB954',
+                            lightgreen: '#1ed760',
                             black: '#121212',
                             dark: '#040404',
                             card: '#181818',
@@ -34,7 +35,7 @@
             }
         }
     </script>
-    
+
     <style>
         /* Custom scrollbar matching Spotify web client */
         ::-webkit-scrollbar {
@@ -51,12 +52,12 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.25);
         }
-        
+
         /* Smooth glowing background transitions */
         .ambient-bg {
             transition: background 1.5s ease;
         }
-        
+
         /* Custom slider progress styling to mimic Spotify active bar */
         input[type="range"] {
             -webkit-appearance: none;
@@ -82,7 +83,7 @@
             opacity: 1;
         }
         input[type="range"]:hover {
-            background: #E91E63;
+            background: #1DB954;
         }
 
         /* Lyric scroll animation utilities */
@@ -94,152 +95,196 @@
             color: #ffffff;
             font-weight: 700;
             transform: scale(1.05);
-            text-shadow: 0 0 15px rgba(233, 30, 99, 0.6);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+        }
+
+        /* Mobile-first responsive adjustments */
+        @media (max-width: 768px) {
+            .lyric-line {
+                font-size: 0.9rem !important;
+                padding: 0.4rem 0 !important;
+            }
+            #lyrics-container {
+                padding-top: 0.5rem !important;
+                padding-bottom: 0.5rem !important;
+            }
+            .mobile-stack {
+                flex-direction: column !important;
+                align-items: center !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .lyric-line {
+                font-size: 0.8rem !important;
+                padding: 0.3rem 0 !important;
+            }
+            .player-controls-mobile {
+                gap: 0.5rem !important;
+            }
+            .player-controls-mobile button {
+                padding: 0.25rem !important;
+            }
         }
     </style>
 </head>
+
 <body class="bg-spotify-dark text-white font-sans h-full overflow-hidden select-none">
 
     <!-- Hidden native audio element -->
     <audio id="audio-element" preload="auto"></audio>
 
     <!-- Ambient glowing backdrop -->
-    <div id="dynamic-backdrop" class="ambient-bg absolute inset-0 bg-gradient-to-b from-rose-950/60 via-amber-950/40 to-spotify-dark z-0 filter blur-3xl opacity-85 pointer-events-none"></div>
+    <div id="dynamic-backdrop" class="ambient-bg absolute inset-0 bg-gradient-to-b from-purple-900/40 via-spotify-black to-spotify-dark z-0 filter blur-3xl opacity-85 pointer-events-none"></div>
 
     <!-- Main Layout Container -->
     <div class="relative z-10 flex flex-col h-full">
-        
-        <!-- Header Navigation Bar -->
-        <header class="flex items-center justify-between px-6 py-4 md:px-8 bg-black/20 backdrop-blur-md border-b border-white/5">
-            <div class="flex items-center space-x-2">
-                <i class="fab fa-spotify text-spotify-green text-3xl animate-pulse"></i>
-                <span class="font-bold text-lg tracking-tight">Spotify <span class="text-spotify-textMuted font-light">Single Release</span></span>
+
+        <!-- Header Navigation Bar - Mobile Optimized -->
+        <header class="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 bg-black/20 backdrop-blur-md border-b border-white/5">
+            <div class="flex items-center space-x-1 sm:space-x-2">
+                <i class="fab fa-spotify text-spotify-green text-2xl sm:text-3xl animate-pulse"></i>
+                <span class="font-bold text-base sm:text-lg tracking-tight hidden xs:inline">Spotify</span>
             </div>
-            
-            <div class="text-right">
-                <p class="text-[10px] uppercase tracking-widest text-spotify-textMuted">NOW PLAYING EXCLUSIVE PREVIEW</p>
-                <p class="text-xs font-semibold text-white/80 truncate max-w-[240px]" id="current-album-title">Billori - Single</p>
+
+            <div class="text-right truncate max-w-[50%]">
+                <p class="text-[8px] xs:text-[10px] uppercase tracking-widest text-spotify-textMuted hidden xs:block">NOW PLAYING</p>
+                <p class="text-[10px] xs:text-xs font-semibold text-white/80 truncate" id="current-album-title">Chill Beats</p>
             </div>
         </header>
 
-        <main class="flex-1 grid grid-cols-1 md:grid-cols-12 overflow-hidden max-w-[1500px] mx-auto w-full p-4 md:p-6 gap-6">
-            
-            <!-- Left Stage Panel (Col-span 7): Album Cover, Visualizer, Info & Stream badging -->
-            <section class="md:col-span-7 flex flex-col justify-between items-center bg-spotify-card/25 backdrop-blur-sm rounded-2xl border border-white/5 p-6 overflow-y-auto">
-                
-                <!-- Album Identity Header for Mobile/Tab -->
-                <div class="w-full text-center mb-4 md:hidden">
-                    <p class="text-[9px] uppercase tracking-widest text-spotify-textMuted">Featured Single</p>
-                    <h2 class="text-sm font-semibold text-white truncate" id="mobile-album-title">Retro Horizons & Chill Beats</h2>
-                </div>
+        <main class="flex-1 grid grid-cols-1 md:grid-cols-12 overflow-hidden max-w-[1500px] mx-auto w-full p-2 sm:p-4 md:p-6 gap-3 md:gap-6">
 
-                <!-- Glowing Cover Art Container -->
-                <div class="relative group my-auto w-52 h-52 sm:w-64 sm:h-64 xl:w-80 xl:h-80 aspect-square rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.85)] border border-white/10 transition-transform duration-500 hover:scale-[1.02]">
-                    <img id="track-cover" src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&q=80&w=800" alt="Cover Art" class="w-full h-full object-cover">
+            <!-- Left Stage Panel - Mobile First -->
+            <section class="md:col-span-7 flex flex-col justify-between items-center bg-spotify-card/25 backdrop-blur-sm rounded-2xl border border-white/5 p-3 sm:p-6 overflow-y-auto">
+
+
+                <!-- Glowing Cover Art Container - Responsive sizing -->
+                <div class="relative group my-2 sm:my-auto w-40 h-40 xs:w-48 xs:h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 lg:w-72 lg:h-72 xl:w-80 xl:h-80 aspect-square rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.85)] border border-white/10 transition-transform duration-500 hover:scale-[1.02] bg-gradient-to-br from-purple-900/50 to-spotify-black">
+                    <img id="track-cover" 
+                         src="https://i.scdn.co/image/ab67616d0000b273e8b066f70c206551710d1f8b" 
+                         alt="Cover Art" 
+                         class="w-full h-full object-cover"
+                         onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22400%22%3E%3Crect width=%22400%22 height=%22400%22 fill=%22%23181818%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-family=%22Arial%22 font-size=%2224%22 fill=%22%23b3b3b3%22 text-anchor=%22middle%22 dy=%22.3em%22%3ENo Cover%3C/text%3E%3C/svg%3E'" />
                     <!-- Overlay Play Hover State -->
                     <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300">
-                        <button onclick="togglePlay()" class="bg-spotify-green text-black w-14 h-14 rounded-full flex items-center justify-center transform scale-90 group-hover:scale-100 transition-all hover:scale-110 active:scale-95 shadow-2xl">
-                            <i id="cover-play-icon" class="fas fa-play text-xl ml-1"></i>
+                        <button onclick="togglePlay()" class="bg-spotify-green text-black w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transform scale-90 group-hover:scale-100 transition-all hover:scale-110 active:scale-95 shadow-2xl">
+                            <i id="cover-play-icon" class="fas fa-play text-base sm:text-xl ml-1"></i>
                         </button>
                     </div>
                 </div>
 
-                <div class="w-full mt-6 flex items-center justify-between">
-                    <div class="truncate pr-4">
-                        <h1 id="track-title" class="text-2xl sm:text-3xl font-extrabold tracking-tight truncate">Neon Lights</h1>
-                        <p id="track-artist" class="text-spotify-textMuted hover:text-white transition-colors text-sm sm:text-base mt-0.5">Lofi Dreamer</p>
+                <!-- Track Info - Mobile Optimized -->
+                <div class="w-full mt-3 sm:mt-6 flex items-center justify-between">
+                    <div class="truncate pr-2 sm:pr-4">
+                        <h1 id="track-title" class="text-lg sm:text-2xl md:text-3xl font-extrabold tracking-tight truncate">Neon Lights</h1>
+                        <p id="track-artist" class="text-spotify-textMuted hover:text-white transition-colors text-xs sm:text-sm md:text-base mt-0.5">Lofi Dreamer</p>
                     </div>
-                    
-                    <div class="flex items-center space-x-3">
-                        <button id="like-btn" onclick="toggleLike()" class="text-spotify-textMuted hover:text-white transition-all transform hover:scale-110 text-xl">
+
+                    <div class="flex items-center space-x-2 sm:space-x-3">
+                        <button id="like-btn" onclick="toggleLike()" class="text-spotify-textMuted hover:text-white transition-all transform hover:scale-110 text-base sm:text-xl">
                             <i class="far fa-heart"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- Focused Stream Button Area -->
-                <div class="w-full mt-5">
-                    <a id="link-spotify" href="https://open.spotify.com" target="_blank" class="flex items-center justify-center gap-3 bg-spotify-green hover:bg-spotify-lightgreen text-white py-3 px-6 rounded-full border border-white/5 text-xs sm:text-sm font-bold tracking-wider transition-all uppercase shadow-[0_10px_30px_rgba(233,30,99,0.3)]">
-                        <i class="fab fa-spotify text-xl"></i>
-                        <span>Listen Full Single On Spotify</span>
-                    </a>
-                </div>
-                
-                <!-- Simulated Dynamic Wave Visualizer Canvas -->
-                <div class="w-full mt-5 h-16 bg-spotify-card/50 rounded-xl border border-white/5 relative overflow-hidden flex items-center justify-center">
+                <!-- Dynamic Wave Visualizer Canvas - Responsive height -->
+                <div class="w-full mt-3 sm:mt-5 h-12 sm:h-16 bg-spotify-card/50 rounded-xl border border-white/5 relative overflow-hidden flex items-center justify-center">
                     <canvas id="visualizer-canvas" class="w-full h-full absolute inset-0 opacity-80"></canvas>
-                    <span class="text-[9px] tracking-widest uppercase text-spotify-textMuted/40 absolute bottom-1 right-2 pointer-events-none">Live Audio Spectrograph</span>
+                    <span class="text-[7px] sm:text-[9px] tracking-widest uppercase text-spotify-textMuted/40 absolute bottom-1 right-1 sm:right-2 pointer-events-none hidden xs:block">Live Audio Spectrograph</span>
                 </div>
             </section>
 
-            <section class="md:col-span-5 flex flex-col bg-spotify-card/30 backdrop-blur-md md:bg-spotify-card/15 rounded-2xl border border-white/5 p-5 overflow-hidden relative">
-                
-                <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
-                    <h2 class="text-sm font-bold uppercase tracking-wider text-spotify-textMuted flex items-center gap-2">
-                        <i class="fas fa-quote-left text-spotify-green"></i> Synced Lyrics
+            <!-- Right Panel: Synced Lyrics - Mobile Optimized -->
+            <section class="md:col-span-5 flex flex-col bg-spotify-card/30 backdrop-blur-md md:bg-spotify-card/15 rounded-2xl border border-white/5 p-3 sm:p-5 overflow-hidden relative min-h-[200px] md:min-h-0">
+
+                <div class="flex items-center justify-between mb-2 sm:mb-4 border-b border-white/5 pb-1 sm:pb-2">
+                    <h2 class="text-[10px] sm:text-sm font-bold uppercase tracking-wider text-spotify-textMuted flex items-center gap-1 sm:gap-2">
+                        <i class="fas fa-quote-left text-spotify-green text-xs sm:text-base"></i> 
+                        <span class="hidden xs:inline">Synced Lyrics</span>
+                        <span class="xs:hidden">Lyrics</span>
                     </h2>
-                    <span id="sync-indicator" class="text-[9px] uppercase bg-spotify-green/20 text-spotify-green border border-spotify-green/30 px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <span class="w-1.5 h-1.5 rounded-full bg-spotify-green animate-pulse"></span> Active Sync
+                    <span id="sync-indicator" class="text-[7px] sm:text-[9px] uppercase bg-spotify-green/20 text-spotify-green border border-spotify-green/30 px-1 sm:px-2 py-0.5 rounded-full flex items-center gap-0.5 sm:gap-1">
+                        <span class="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-spotify-green animate-pulse"></span> 
+                        <span class="hidden xs:inline">Active Sync</span>
                     </span>
                 </div>
 
-                <!-- Scrolling lyrics box -->
-                <div id="lyrics-container" class="flex-1 overflow-y-auto space-y-4 pr-2 scroll-smooth py-12 relative">
+                <!-- Scrolling lyrics box - Mobile optimized -->
+                <div id="lyrics-container" class="flex-1 overflow-y-auto space-y-1 sm:space-y-3 pr-1 sm:pr-2 scroll-smooth py-2 sm:py-12 relative">
                     <!-- Lyrics loaded by JS -->
-                    <p class="text-spotify-textMuted/40 text-center py-8">Loading track synchronization...</p>
+                    <p class="text-spotify-textMuted/40 text-center py-4 sm:py-8 text-xs sm:text-base">Loading track synchronization...</p>
                 </div>
             </section>
         </main>
 
-        <footer class="bg-spotify-card border-t border-spotify-border p-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0 relative z-20">
-            
-            <!-- Left: Current Track Mini-Thumb (Hidden on mobile) -->
+        <!-- Footer Player Controls - Mobile First -->
+        <footer class="bg-spotify-card border-t border-spotify-border p-2 sm:p-4 md:px-8 flex flex-col items-center gap-2 sm:gap-4 relative z-20">
+
+            <!-- Mobile: Current Track Mini-Thumb (Hidden on desktop, shown on mobile) -->
+            <div class="flex md:hidden items-center justify-center w-full space-x-2 sm:space-x-3">
+                <img id="mini-thumb-mobile" 
+                     class="w-8 h-8 sm:w-10 sm:h-10 rounded-md object-cover border border-white/10 bg-spotify-card" 
+                     src="https://i.scdn.co/image/ab67616d0000b273e8b066f70c206551710d1f8b" 
+                     alt="Mini Thumbnail"
+                     onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2248%22 height=%2248%22%3E%3Crect width=%2248%22 height=%2248%22 fill=%22%23181818%22/%3E%3C/svg%3E'" />
+                <div class="truncate flex-1 text-center">
+                    <p id="mini-title-mobile" class="font-medium text-xs sm:text-sm text-white truncate">Neon Lights</p>
+                    <p id="mini-artist-mobile" class="text-[10px] sm:text-xs text-spotify-textMuted truncate">Lofi Dreamer</p>
+                </div>
+            </div>
+
+            <!-- Desktop: Current Track Mini-Thumb -->
             <div class="hidden md:flex items-center space-x-3 w-1/4 min-w-[200px]">
-                <img id="mini-thumb" class="w-12 h-12 rounded-md object-cover border border-white/10" src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&q=80&w=200" alt="Mini Thumbnail">
+                <img id="mini-thumb" 
+                     class="w-12 h-12 rounded-md object-cover border border-white/10 bg-spotify-card" 
+                     src="https://i.scdn.co/image/ab67616d0000b273e8b066f70c206551710d1f8b" 
+                     alt="Mini Thumbnail"
+                     onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2248%22 height=%2248%22%3E%3Crect width=%2248%22 height=%2248%22 fill=%22%23181818%22/%3E%3C/svg%3E'" />
                 <div class="truncate">
                     <p id="mini-title" class="font-medium text-xs text-white truncate">Neon Lights</p>
                     <p id="mini-artist" class="text-[11px] text-spotify-textMuted hover:text-white transition-colors truncate">Lofi Dreamer</p>
                 </div>
             </div>
 
-            <!-- Center: Player controls & timelines -->
+            <!-- Center: Player controls & timelines - Responsive -->
             <div class="flex flex-col items-center w-full md:w-2/4 max-w-xl">
-                <!-- Control Buttons -->
-                <div class="flex items-center space-x-6 mb-2">
-                    <button id="shuffle-btn" onclick="toggleShuffle()" class="text-spotify-textMuted hover:text-white transition-all text-xs relative" title="Toggle Intro Loop">
+                <!-- Control Buttons - Mobile Optimized -->
+                <div class="flex items-center space-x-3 sm:space-x-4 md:space-x-6 mb-1 sm:mb-2 player-controls-mobile">
+                    <button id="shuffle-btn" onclick="toggleShuffle()" class="text-spotify-textMuted hover:text-white transition-all text-[10px] sm:text-xs relative" title="Toggle Intro Loop">
                         <i class="fas fa-random"></i>
                     </button>
                     <!-- Rewind 15 seconds -->
-                    <button onclick="skipTime(-15)" class="text-spotify-textMuted hover:text-white transition-all text-sm flex items-center gap-1" title="Rewind 15s">
+                    <button onclick="skipTime(-15)" class="text-spotify-textMuted hover:text-white transition-all text-xs sm:text-sm flex items-center gap-0.5 sm:gap-1" title="Rewind 15s">
                         <i class="fas fa-backward"></i>
-                        <span class="text-[9px] font-bold">-15s</span>
+                        <span class="text-[7px] sm:text-[9px] font-bold hidden xs:inline">-15s</span>
                     </button>
-                    <!-- Play / Pause -->
-                    <button onclick="togglePlay()" id="play-btn" class="bg-white text-black w-10 h-10 rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md" title="Play / Pause">
-                        <i class="fas fa-play text-sm ml-0.5"></i>
+                    <!-- Play / Pause - Bigger on mobile -->
+                    <button onclick="togglePlay()" id="play-btn" class="bg-white text-black w-9 h-9 sm:w-10 sm:h-10 md:w-10 md:h-10 rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md" title="Play / Pause">
+                        <i class="fas fa-play text-xs sm:text-sm ml-0.5"></i>
                     </button>
                     <!-- Skip Forward 15 seconds -->
-                    <button onclick="skipTime(15)" class="text-spotify-textMuted hover:text-white transition-all text-sm flex items-center gap-1" title="Forward 15s">
-                        <span class="text-[9px] font-bold">+15s</span>
+                    <button onclick="skipTime(15)" class="text-spotify-textMuted hover:text-white transition-all text-xs sm:text-sm flex items-center gap-0.5 sm:gap-1" title="Forward 15s">
+                        <span class="text-[7px] sm:text-[9px] font-bold hidden xs:inline">+15s</span>
                         <i class="fas fa-forward"></i>
                     </button>
-                    <button id="repeat-btn" onclick="toggleRepeat()" class="text-spotify-textMuted hover:text-white transition-all text-xs relative" title="Repeat Single">
+                    <button id="repeat-btn" onclick="toggleRepeat()" class="text-spotify-textMuted hover:text-white transition-all text-[10px] sm:text-xs relative" title="Repeat Single">
                         <i class="fas fa-redo"></i>
                     </button>
                 </div>
 
-                <!-- Progress Bar Timeline -->
-                <div class="w-full flex items-center space-x-3">
-                    <span id="current-time" class="text-[10px] text-spotify-textMuted w-10 text-right">0:00</span>
+                <!-- Progress Bar Timeline - Mobile Optimized -->
+                <div class="w-full flex items-center space-x-1.5 sm:space-x-3">
+                    <span id="current-time" class="text-[8px] sm:text-[10px] text-spotify-textMuted w-6 sm:w-10 text-right">0:00</span>
                     <div class="relative flex-1 group flex items-center">
-                        <input id="progress-bar" type="range" min="0" max="100" value="0" class="w-full accent-spotify-green" oninput="seekAudio(this.value)">
+                        <input id="progress-bar" type="range" min="0" max="100" value="0" class="w-full accent-spotify-green h-1 sm:h-1.5" oninput="seekAudio(this.value)" />
                     </div>
-                    <span id="duration" class="text-[10px] text-spotify-textMuted w-10">0:00</span>
+                    <span id="duration" class="text-[8px] sm:text-[10px] text-spotify-textMuted w-6 sm:w-10">0:00</span>
                 </div>
             </div>
 
-            <!-- Right: Secondary Volume & share integrations -->
-            <div class="flex items-center justify-end space-x-4 w-full md:w-1/4">
+            <!-- Right: Secondary controls - Desktop only, mobile hidden -->
+            <div class="hidden md:flex items-center justify-end space-x-4 w-1/4">
                 <button onclick="scrollToActiveLyric()" class="text-spotify-textMuted hover:text-spotify-green transition-colors text-sm" title="Center Scroll Active Lyric">
                     <i class="fas fa-align-left text-base"></i>
                 </button>
@@ -248,17 +293,33 @@
                     <button onclick="toggleMute()" id="mute-btn" class="text-spotify-textMuted hover:text-white transition-colors" title="Mute Volume">
                         <i class="fas fa-volume-up"></i>
                     </button>
-                    <input id="volume-slider" type="range" min="0" max="100" value="80" class="w-full accent-spotify-green" oninput="setVolume(this.value)">
+                    <input id="volume-slider" type="range" min="0" max="100" value="80" class="w-full accent-spotify-green" oninput="setVolume(this.value)" />
                 </div>
                 
                 <button onclick="shareTrack()" class="text-spotify-textMuted hover:text-white transition-colors" title="Copy Release Details Share Message">
                     <i class="fas fa-share-alt"></i>
                 </button>
             </div>
+
+            <!-- Mobile: Additional controls row -->
+            <div class="flex md:hidden items-center justify-center space-x-4 w-full mt-1">
+                <button onclick="scrollToActiveLyric()" class="text-spotify-textMuted hover:text-spotify-green transition-colors text-xs" title="Center Scroll Active Lyric">
+                    <i class="fas fa-align-left"></i>
+                </button>
+                <button onclick="toggleMute()" id="mute-btn-mobile" class="text-spotify-textMuted hover:text-white transition-colors text-xs" title="Mute Volume">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+                <button onclick="shareTrack()" class="text-spotify-textMuted hover:text-white transition-colors text-xs" title="Copy Release Details Share Message">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+                <button id="like-btn-mobile" onclick="toggleLikeMobile()" class="text-spotify-textMuted hover:text-white transition-colors text-xs">
+                    <i class="far fa-heart"></i>
+                </button>
+            </div>
         </footer>
 
         <!-- Custom Copy Toast Alert Box -->
-        <div id="toast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-spotify-green text-white px-6 py-2.5 rounded-full font-bold shadow-2xl tracking-wide opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-2">
+        <div id="toast" class="fixed bottom-20 sm:bottom-24 left-1/2 transform -translate-x-1/2 bg-spotify-green text-black px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-full font-bold shadow-2xl tracking-wide opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-1 sm:gap-2 text-xs sm:text-base">
             <i class="fas fa-check-circle"></i>
             <span id="toast-message">Copied Share Link!</span>
         </div>
@@ -266,7 +327,7 @@
 
     <script>
         // High fidelity single song dataset with synced lyrics, backdrop config, and media metadata
-        let trackDetails = {
+       let trackDetails = {
             title: "Udi Udi",
             artist: "MHR & Bhumi",
             album: "Billori - Single",
@@ -332,6 +393,7 @@
         const shuffleBtn = document.getElementById('shuffle-btn');
         const repeatBtn = document.getElementById('repeat-btn');
         const likeBtn = document.getElementById('like-btn');
+        const likeBtnMobile = document.getElementById('like-btn-mobile');
         const lyricsContainer = document.getElementById('lyrics-container');
 
         // Dynamic page components
@@ -341,10 +403,14 @@
         const mobileAlbumTitle = document.getElementById('mobile-album-title');
         const trackCover = document.getElementById('track-cover');
         const miniThumb = document.getElementById('mini-thumb');
+        const miniThumbMobile = document.getElementById('mini-thumb-mobile');
         const miniTitle = document.getElementById('mini-title');
+        const miniTitleMobile = document.getElementById('mini-title-mobile');
         const miniArtist = document.getElementById('mini-artist');
+        const miniArtistMobile = document.getElementById('mini-artist-mobile');
         const backdrop = document.getElementById('dynamic-backdrop');
         const coverPlayIcon = document.getElementById('cover-play-icon');
+        const muteBtnMobile = document.getElementById('mute-btn-mobile');
 
         const canvas = document.getElementById('visualizer-canvas');
         const ctx = canvas.getContext('2d');
@@ -374,7 +440,7 @@
         function drawVisualizer() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const barWidth = canvas.width / totalBars;
-            
+
             for (let i = 0; i < totalBars; i++) {
                 const bar = visualizerBars[i];
                 if (isPlaying) {
@@ -388,17 +454,17 @@
                 bar.currentHeight += (bar.targetHeight - bar.currentHeight) * bar.speed;
                 const xPos = i * barWidth;
                 const yPos = canvas.height - bar.currentHeight;
-                
+
                 const grad = ctx.createLinearGradient(xPos, canvas.height, xPos, yPos);
-                grad.addColorStop(0, '#E91E63'); // Crimson Rose base
-                grad.addColorStop(1, '#FF5722'); // Golden Saffron crest
-                
+                grad.addColorStop(0, '#1DB954');
+                grad.addColorStop(1, '#1ed760');
+
                 ctx.fillStyle = grad;
                 ctx.beginPath();
                 ctx.roundRect(xPos + 2, yPos, barWidth - 4, bar.currentHeight, 2.5);
                 ctx.fill();
             }
-            
+
             visualizerAnimFrameId = requestAnimationFrame(drawVisualizer);
         }
 
@@ -409,20 +475,23 @@
             trackArtist.textContent = track.artist;
             currentAlbumTitle.textContent = track.album;
             if (mobileAlbumTitle) mobileAlbumTitle.textContent = track.album;
+            
+            // Set cover images
             trackCover.src = track.cover;
             miniThumb.src = track.cover;
+            miniThumbMobile.src = track.cover;
             miniTitle.textContent = track.title;
+            miniTitleMobile.textContent = track.title;
             miniArtist.textContent = track.artist;
+            miniArtistMobile.textContent = track.artist;
 
-            // Update external buttons
-            document.getElementById('link-spotify').href = track.spotifyUrl || "https://open.spotify.com";
-            
             // Adjust dynamic theme ambient glow background
-            backdrop.className = `ambient-bg absolute inset-0 bg-gradient-to-b ${track.themeColor || 'from-purple-950/50 via-spotify-black to-spotify-dark'} to-spotify-dark z-0 filter blur-3xl opacity-85 pointer-events-none`;
-            
+            backdrop.className =
+                `ambient-bg absolute inset-0 bg-gradient-to-b ${track.themeColor || 'from-purple-950/50 via-spotify-black to-spotify-dark'} to-spotify-dark z-0 filter blur-3xl opacity-85 pointer-events-none`;
+
             renderLyrics(track.lyrics);
             activeLyricIndex = -1;
-            
+
             // Reset player timelines
             progressBar.value = 0;
             currentTimeEl.textContent = "0:00";
@@ -433,16 +502,17 @@
         function renderLyrics(lyrics) {
             lyricsContainer.innerHTML = '';
             if (!lyrics || lyrics.length === 0) {
-                lyricsContainer.innerHTML = `<p class="text-spotify-textMuted text-center mt-12 italic">Instrumental - No Lyrics Available</p>`;
+                lyricsContainer.innerHTML =
+                    `<p class="text-spotify-textMuted text-center mt-4 sm:mt-12 italic text-xs sm:text-base">Instrumental - No Lyrics Available</p>`;
                 return;
             }
 
             lyrics.forEach((lyric, index) => {
                 const p = document.createElement('p');
                 p.id = `lyric-${index}`;
-                p.className = 'lyric-line text-lg sm:text-xl font-semibold text-spotify-textMuted/30 text-left py-1.5 cursor-pointer hover:text-white/80';
+                p.className = 'lyric-line text-sm sm:text-lg md:text-xl font-semibold text-spotify-textMuted/30 text-left py-0.5 sm:py-1.5 cursor-pointer hover:text-white/80';
                 p.textContent = lyric.text;
-                
+
                 // Allow jumping directly to timeline lyric point
                 p.onclick = () => {
                     audio.currentTime = lyric.time;
@@ -460,7 +530,6 @@
             const time = audio.currentTime;
             let activeIdx = -1;
 
-            // Find current active lyric line matching playing seconds
             for (let i = 0; i < trackDetails.lyrics.length; i++) {
                 if (time >= trackDetails.lyrics[i].time) {
                     activeIdx = i;
@@ -470,7 +539,6 @@
             }
 
             if (activeIdx !== activeLyricIndex && activeIdx !== -1) {
-                // Remove active styling from previous
                 if (activeLyricIndex !== -1) {
                     const prevEl = document.getElementById(`lyric-${activeLyricIndex}`);
                     if (prevEl) {
@@ -479,18 +547,16 @@
                     }
                 }
 
-                // Update & Highlight Active Element
                 activeLyricIndex = activeIdx;
                 const activeEl = document.getElementById(`lyric-${activeLyricIndex}`);
                 if (activeEl) {
                     activeEl.classList.add('active');
                     activeEl.classList.remove('text-spotify-textMuted/30');
-                    
-                    // Scroll active lyric to center
+
                     const containerHeight = lyricsContainer.clientHeight;
                     const elOffset = activeEl.offsetTop;
                     const elHeight = activeEl.clientHeight;
-                    
+
                     lyricsContainer.scrollTo({
                         top: elOffset - (containerHeight / 2) + (elHeight / 2),
                         behavior: 'smooth'
@@ -513,13 +579,13 @@
             if (isPlaying) {
                 audio.pause();
                 isPlaying = false;
-                playBtn.innerHTML = '<i class="fas fa-play text-sm ml-0.5"></i>';
-                coverPlayIcon.className = "fas fa-play text-xl ml-0.5";
+                playBtn.innerHTML = '<i class="fas fa-play text-xs sm:text-sm ml-0.5"></i>';
+                coverPlayIcon.className = "fas fa-play text-base sm:text-xl ml-0.5";
             } else {
                 audio.play().then(() => {
                     isPlaying = true;
-                    playBtn.innerHTML = '<i class="fas fa-pause text-sm"></i>';
-                    coverPlayIcon.className = "fas fa-pause text-xl";
+                    playBtn.innerHTML = '<i class="fas fa-pause text-xs sm:text-sm"></i>';
+                    coverPlayIcon.className = "fas fa-pause text-base sm:text-xl";
                 }).catch(e => {
                     showToast("Playback initialized: Tap to play!");
                 });
@@ -539,15 +605,15 @@
         // Audio seek progress update
         audio.addEventListener('timeupdate', () => {
             if (!audio.duration) return;
-            
+
             const current = audio.currentTime;
             const total = audio.duration;
             const progress = (current / total) * 100;
-            
+
             progressBar.value = progress;
             currentTimeEl.textContent = formatTime(current);
             durationEl.textContent = formatTime(total);
-            
+
             updateLyricsSync();
         });
 
@@ -575,12 +641,15 @@
             audio.volume = value / 100;
             if (value == 0) {
                 muteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                if (muteBtnMobile) muteBtnMobile.innerHTML = '<i class="fas fa-volume-mute"></i>';
                 isMuted = true;
             } else if (value < 50) {
                 muteBtn.innerHTML = '<i class="fas fa-volume-down"></i>';
+                if (muteBtnMobile) muteBtnMobile.innerHTML = '<i class="fas fa-volume-down"></i>';
                 isMuted = false;
             } else {
                 muteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                if (muteBtnMobile) muteBtnMobile.innerHTML = '<i class="fas fa-volume-up"></i>';
                 isMuted = false;
             }
         }
@@ -591,27 +660,42 @@
                 audio.volume = 0.8;
                 volumeSlider.value = 80;
                 muteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                if (muteBtnMobile) muteBtnMobile.innerHTML = '<i class="fas fa-volume-up"></i>';
                 isMuted = false;
             } else {
                 audio.volume = 0;
                 volumeSlider.value = 0;
                 muteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                if (muteBtnMobile) muteBtnMobile.innerHTML = '<i class="fas fa-volume-mute"></i>';
                 isMuted = true;
             }
         }
 
-        // Toggle heart like state
+        // Toggle heart like state - desktop
         function toggleLike() {
             userLiked = !userLiked;
             if (userLiked) {
-                likeBtn.innerHTML = '<i class="fas fa-heart text-spotify-green text-lg animate-bounce"></i>';
+                likeBtn.innerHTML = '<i class="fas fa-heart text-spotify-green text-base sm:text-lg animate-bounce"></i>';
                 likeBtn.classList.remove('text-spotify-textMuted');
+                if (likeBtnMobile) {
+                    likeBtnMobile.innerHTML = '<i class="fas fa-heart text-spotify-green"></i>';
+                    likeBtnMobile.classList.remove('text-spotify-textMuted');
+                }
                 showToast("Added to Your Library!");
             } else {
                 likeBtn.innerHTML = '<i class="far fa-heart"></i>';
                 likeBtn.classList.add('text-spotify-textMuted');
+                if (likeBtnMobile) {
+                    likeBtnMobile.innerHTML = '<i class="far fa-heart"></i>';
+                    likeBtnMobile.classList.add('text-spotify-textMuted');
+                }
                 showToast("Removed from Your Library");
             }
+        }
+
+        // Toggle heart like state - mobile
+        function toggleLikeMobile() {
+            toggleLike();
         }
 
         // Custom loop repeat behaviors
@@ -630,7 +714,7 @@
             }
         }
 
-        // Custom shuffle indicators (for a single song, this can simulate an Intro Loop mode)
+        // Custom shuffle indicators
         function toggleShuffle() {
             isShuffle = !isShuffle;
             if (isShuffle) {
@@ -647,14 +731,12 @@
         // Auto trigger next loop track at completion loop bounds
         audio.addEventListener('ended', () => {
             if (isShuffle) {
-                // Return to intro (second 0) and keep playing
                 audio.currentTime = 0;
                 audio.play();
             } else if (!isRepeat) {
-                // Default stop
                 isPlaying = false;
-                playBtn.innerHTML = '<i class="fas fa-play text-sm ml-0.5"></i>';
-                coverPlayIcon.className = "fas fa-play text-xl ml-0.5";
+                playBtn.innerHTML = '<i class="fas fa-play text-xs sm:text-sm ml-0.5"></i>';
+                coverPlayIcon.className = "fas fa-play text-base sm:text-xl ml-0.5";
             }
         });
 
@@ -663,7 +745,7 @@
             const toast = document.getElementById('toast');
             document.getElementById('toast-message').textContent = message;
             toast.style.opacity = '1';
-            
+
             setTimeout(() => {
                 toast.style.opacity = '0';
             }, 2500);
@@ -672,7 +754,8 @@
         // Copy release details to clipboard
         function shareTrack() {
             const textarea = document.createElement('textarea');
-            textarea.value = `Now listening to "${trackDetails.title}" by ${trackDetails.artist} on Spotify! Stream it here: ${trackDetails.spotifyUrl}`;
+            textarea.value =
+                `Now listening to "${trackDetails.title}" by ${trackDetails.artist} on Spotify! Stream it here: ${trackDetails.spotifyUrl}`;
             document.body.appendChild(textarea);
             textarea.select();
             try {
@@ -688,6 +771,9 @@
             audio.volume = 0.8;
             loadTrack(trackDetails);
             drawVisualizer();
+            
+            // Set initial volume icon
+            setVolume(80);
         };
     </script>
 </body>
