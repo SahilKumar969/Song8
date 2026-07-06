@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify Now Playing - Premium Single Experience</title>
+    <title>Spotify Now Playing - Billori Single Experience</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons for authentic Spotify controls -->
@@ -20,8 +20,8 @@
                     },
                     colors: {
                         spotify: {
-                            green: '#1DB954',
-                            lightgreen: '#1ed760',
+                            green: '#E91E63', /* Customized to beautiful crimson-rose to match Billori theme */
+                            lightgreen: '#FF5722', /* Vibrant saffron orange */
                             black: '#121212',
                             dark: '#040404',
                             card: '#181818',
@@ -82,7 +82,7 @@
             opacity: 1;
         }
         input[type="range"]:hover {
-            background: #1DB954;
+            background: #E91E63;
         }
 
         /* Lyric scroll animation utilities */
@@ -94,7 +94,7 @@
             color: #ffffff;
             font-weight: 700;
             transform: scale(1.05);
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+            text-shadow: 0 0 15px rgba(233, 30, 99, 0.6);
         }
     </style>
 </head>
@@ -104,7 +104,7 @@
     <audio id="audio-element" preload="auto"></audio>
 
     <!-- Ambient glowing backdrop -->
-    <div id="dynamic-backdrop" class="ambient-bg absolute inset-0 bg-gradient-to-b from-purple-900/40 via-spotify-black to-spotify-dark z-0 filter blur-3xl opacity-85 pointer-events-none"></div>
+    <div id="dynamic-backdrop" class="ambient-bg absolute inset-0 bg-gradient-to-b from-rose-950/60 via-amber-950/40 to-spotify-dark z-0 filter blur-3xl opacity-85 pointer-events-none"></div>
 
     <!-- Main Layout Container -->
     <div class="relative z-10 flex flex-col h-full">
@@ -113,12 +113,12 @@
         <header class="flex items-center justify-between px-6 py-4 md:px-8 bg-black/20 backdrop-blur-md border-b border-white/5">
             <div class="flex items-center space-x-2">
                 <i class="fab fa-spotify text-spotify-green text-3xl animate-pulse"></i>
-                <span class="font-bold text-lg tracking-tight">Spotify <span class="text-spotify-textMuted font-light"></span></span>
+                <span class="font-bold text-lg tracking-tight">Spotify <span class="text-spotify-textMuted font-light">Single Release</span></span>
             </div>
             
             <div class="text-right">
                 <p class="text-[10px] uppercase tracking-widest text-spotify-textMuted">NOW PLAYING EXCLUSIVE PREVIEW</p>
-                <p class="text-xs font-semibold text-white/80 truncate max-w-[240px]" id="current-album-title">Retro Horizons & Chill Beats</p>
+                <p class="text-xs font-semibold text-white/80 truncate max-w-[240px]" id="current-album-title">Billori - Single</p>
             </div>
         </header>
 
@@ -159,7 +159,7 @@
 
                 <!-- Focused Stream Button Area -->
                 <div class="w-full mt-5">
-                    <a id="link-spotify" href="https://open.spotify.com" target="_blank" class="flex items-center justify-center gap-3 bg-spotify-green hover:bg-spotify-lightgreen text-black py-3 px-6 rounded-full border border-white/5 text-xs sm:text-sm font-bold tracking-wider transition-all uppercase shadow-[0_10px_30px_rgba(29,185,84,0.3)]">
+                    <a id="link-spotify" href="https://open.spotify.com" target="_blank" class="flex items-center justify-center gap-3 bg-spotify-green hover:bg-spotify-lightgreen text-white py-3 px-6 rounded-full border border-white/5 text-xs sm:text-sm font-bold tracking-wider transition-all uppercase shadow-[0_10px_30px_rgba(233,30,99,0.3)]">
                         <i class="fab fa-spotify text-xl"></i>
                         <span>Listen Full Single On Spotify</span>
                     </a>
@@ -258,7 +258,7 @@
         </footer>
 
         <!-- Custom Copy Toast Alert Box -->
-        <div id="toast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-spotify-green text-black px-6 py-2.5 rounded-full font-bold shadow-2xl tracking-wide opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-2">
+        <div id="toast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-spotify-green text-white px-6 py-2.5 rounded-full font-bold shadow-2xl tracking-wide opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-2">
             <i class="fas fa-check-circle"></i>
             <span id="toast-message">Copied Share Link!</span>
         </div>
@@ -267,23 +267,50 @@
     <script>
         // High fidelity single song dataset with synced lyrics, backdrop config, and media metadata
         let trackDetails = {
-            title: "Only Mine",
-            artist: "Lofi Dreamer",
-            album: "Retro Horizons & Chill Beats",
-            cover: "https://t2.genius.com/unsafe/258x258/https%3A%2F%2Fimages.genius.com%2Fa0273334148084b20f52fb1cdc101b1c.1000x1000x1.png",
-            audioUrl: "song7.mp3",
-            themeColor: "from-purple-950/50 via-spotify-black to-spotify-dark",
+            title: "Udi Udi",
+            artist: "MHR & Bhumi",
+            album: "Billori - Single",
+            cover: "https://t2.genius.com/unsafe/258x258/https%3A%2F%2Fimages.genius.com%2F19f34d942d78e2b311611c71e16e1ed4.600x600x1.webp",
+            audioUrl: "song8.mp3",
+            themeColor: "from-rose-950/60 via-amber-950/40 to-spotify-dark",
             spotifyUrl: "https://open.spotify.com",
             lyrics: [
-                { time: 0, text: `Koi bhi khwaahish nahi iss dil ko, tu mil jaaye toh 🎵` },
-                { time: 5, text: `Milta hai isko sukoon chehra tera khil jaaye toh` },
-                { time: 10, text: "Phiru ab maara maara main\nChaand se bichhda taara main" },
-                { time: 15, text: `Mere ho (Mere ho), bas mere tum (Mere tum)` },
-                { time: 20, text: `Keh do na saare ke saare mere tum
-Milte hain kismat se (Kismat se)` },
-                { time: 25, text: `Kismat ke aise sitaare mere tum` },
-                { time: 30, text: `Kehta hoon itni mohabbat hai tumse, jitni falak se zameen
-Keh do na tum bhi yeh, kehne mein kya hai? Hota hai ishq yahi` },
+                { time: 0, text: "🎵 (Energetic Folk Beats & Dhol building up) 🎵" },
+                { time: 12, text: "[Hook]" },
+                { time: 15, text: "Billori chunariya yu udi udi jaaye rey" },
+                { time: 20, text: "Gori kamariya yu latak matak jaye" },
+                { time: 25, text: "Chori balkhariya yu ghumad ghumad gaye rey" },
+                { time: 30, text: "Soni payaliya yu chamak dhamak jaaye" },
+                { time: 35, text: "Billori chunariya yu udi udi jaaye rey" },
+                { time: 40, text: "Gori kamariya yu latak matak jaye" },
+                { time: 45, text: "Chori balkhariya yu ghumad ghumad gaye rey" },
+                { time: 50, text: "Soni payaliya yu chamak dhamak jaaye" },
+                { time: 55, text: "🎵 (Harmonium & Flute Interlude) 🎵" },
+                { time: 60, text: "[Verse 1]" },
+                { time: 62, text: "Billori jhaanke mhare mann mei tho jhalkai tu" },
+                { time: 70, text: "Mitthi si chashani voh lage manne bhavi khoob" },
+                { time: 68, text: "Billori jhaanke mhare mann mei tho jhalkai tu" },
+                { time: 76, text: "Mitthi si chashani voh lage manne bhavi khoob" },
+                { time: 84, text: "Sawari si surat, Jo tanne tadpaye re" },
+                { time: 92, text: "Thumak thumak matke, Billori sharmaye re" },
+                { time: 100, text: "Chaale chalati hu jhalak tohe dikhe yuh" },
+                { time: 108, text: "Jhoome jo magan hoke woh, Lage yuh" },
+                { time: 116, text: "Naina chupau nazar me aaye yu" },
+                { time: 124, text: "[Pre hook]" },
+                { time: 126, text: "Udi udi mhare udi udi jaaye rey" },
+                { time: 130, text: "Udi udi mhare udi udi jaaye rey" },
+                { time: 134, text: "Udi udi mhare udi udi jaaye rey" },
+                { time: 138, text: "🎵 (Dholak & Tabla Solo) 🎵" },
+                { time: 150, text: "[Hook]" },
+                { time: 152, text: "Billori chunariya yu udi udi jaaye rey" },
+                { time: 156, text: "Gori kamariya yu latak matak jaye" },
+                { time: 160, text: "Chori balkhariya yu ghumad ghumad gaye rey" },
+                { time: 164, text: "Soni payaliya yu chamak dhamak jaaye" },
+                { time: 168, text: "Billori chunariya yu udi udi jaaye rey" },
+                { time: 172, text: "Gori kamariya yu latak matak jaye" },
+                { time: 176, text: "Chori balkhariya yu ghumad ghumad gaye rey" },
+                { time: 180, text: "Soni payaliya yu chamak dhamak jaaye" },
+                { time: 184, text: "🎵 (Outro - Echoing Chunariya Beats) 🎵" }
             ]
         };
 
@@ -363,8 +390,8 @@ Keh do na tum bhi yeh, kehne mein kya hai? Hota hai ishq yahi` },
                 const yPos = canvas.height - bar.currentHeight;
                 
                 const grad = ctx.createLinearGradient(xPos, canvas.height, xPos, yPos);
-                grad.addColorStop(0, '#1DB954');
-                grad.addColorStop(1, '#1ed760');
+                grad.addColorStop(0, '#E91E63'); // Crimson Rose base
+                grad.addColorStop(1, '#FF5722'); // Golden Saffron crest
                 
                 ctx.fillStyle = grad;
                 ctx.beginPath();
